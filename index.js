@@ -34,103 +34,69 @@ const bookingTransporter = nodemailer.createTransport({
   },
 });
 
-// --- Admin Transporter ---
-const adminTransporter = nodemailer.createTransport({
-  host: "mail.uniquescrubz.co.za",
-  port: 465,
-  secure: true,
-  auth: {
-    user: process.env.ADMIN_EMAIL,
-    pass: process.env.ADMIN_PASSWORD,
-  },
+// Send to customer
+await orderTransporter.sendMail({
+  from: `"Unique Scrubz Orders" <${process.env.MAIL_USER}>`,
+  to: email,
+  subject: "Your Unique Scrubz Order Confirmation",
+  html: `
+    <h2>Thank you for your order, ${name}!</h2>
+    <p><strong>Order Summary:</strong></p>
+    <p>${items}</p>
+    <p><strong>Total:</strong> ${total}</p>
+    <p>We'll process your order shortly.</p>
+    <br/>
+    <small>&copy; ${new Date().getFullYear()} Unique Scrubz</small>
+  `,
 });
 
-// ✅ Send Order Confirmation + Admin Notification
-app.post("/send-email", async (req, res) => {
-  const { name, email, items, total } = req.body;
-
-  const customerMail = {
-    from: `"Unique Scrubz Orders" <${process.env.MAIL_USER}>`,
-    to: email,
-    subject: "Your Unique Scrubz Order Confirmation",
-    html: `
-      <h2>Thank you for your order, ${name}!</h2>
-      <p><strong>Order Summary:</strong> ${items}</p>
-      <p><strong>Total:</strong> ${total}</p>
-      <p>We'll process your order shortly.</p>
-      <small>&copy; ${new Date().getFullYear()} Unique Scrubz</small>
-    `,
-  };
-
-  const adminMail = {
-    from: `"Order Notification" <${process.env.ADMIN_EMAIL}>`,
-    to: process.env.ADMIN_EMAIL,
-    subject: `🛒 New Order Received from ${name}`,
-    html: `
-      <h2>New order received</h2>
-      <ul>
-        <li><strong>Customer:</strong> ${name}</li>
-        <li><strong>Email:</strong> ${email}</li>
-        <li><strong>Order:</strong> ${items}</li>
-        <li><strong>Total:</strong> ${total}</li>
-      </ul>
-    `,
-  };
-
-  try {
-    await orderTransporter.sendMail(customerMail);
-    await orderTransporter.sendMail(adminMail); // 🔔 Notify admin
-    console.log("✅ Order emails sent (customer & admin)");
-    res.status(200).json({ message: "Order emails sent" });
-  } catch (err) {
-    console.error("❌ Order email error:", err.message);
-    res.status(500).json({ error: "Failed to send order emails" });
-  }
+// Send copy to admin
+await orderTransporter.sendMail({
+  from: `"Order Notification" <${process.env.MAIL_USER}>`,
+  to: process.env.ORDERS_EMAIL,
+  subject: `🛒 New Order Received from ${name}`,
+  html: `
+    <h2>New order received</h2>
+    <ul>
+      <li><strong>Customer:</strong> ${name}</li>
+      <li><strong>Email:</strong> ${email}</li>
+      <li><strong>Items:</strong> ${items}</li>
+      <li><strong>Total:</strong> ${total}</li>
+    </ul>
+  `,
 });
 
-// ✅ Send Appointment Confirmation + Admin Notification
-app.post("/send-manufacturing-booking", async (req, res) => {
-  const { name, email, phone, message } = req.body;
+// Send to client
+await bookingTransporter.sendMail({
+  from: `"Unique Scrubz Appointments" <${process.env.BOOKING_MAIL_USER}>`,
+  to: email,
+  subject: "Your Unique Scrubz Manufacturing Appointment Confirmation",
+  html: `
+    <h2>Thank you for your appointment request, ${name}!</h2>
+    <ul>
+      <li><strong>Email:</strong> ${email}</li>
+      <li><strong>Phone:</strong> ${phone}</li>
+      <li><strong>Message:</strong> ${message}</li>
+    </ul>
+    <p>We'll get back to you soon!</p>
+    <small>&copy; ${new Date().getFullYear()} Unique Scrubz</small>
+  `,
+});
 
-  const customerMail = {
-    from: `"Unique Scrubz Appointments" <${process.env.BOOKING_MAIL_USER}>`,
-    to: email,
-    subject: "Your Unique Scrubz Manufacturing Appointment Confirmation",
-    html: `
-      <h2>Thank you, ${name}!</h2>
-      <p>Your manufacturing appointment request has been received.</p>
-      <ul>
-        <li><strong>Email:</strong> ${email}</li>
-        <li><strong>Phone:</strong> ${phone}</li>
-        <li><strong>Message:</strong> ${message}</li>
-      </ul>
-    `,
-  };
-
-  const adminMail = {
-    from: `"Appointment Notification" <${process.env.ADMIN_EMAIL}>`,
-    to: process.env.ADMIN_EMAIL,
-    subject: `📅 New Appointment Request from ${name}`,
-    html: `
-      <h2>New manufacturing appointment request</h2>
-      <ul>
-        <li><strong>Name:</strong> ${name}</li>
-        <li><strong>Email:</strong> ${email}</li>
-        <li><strong>Phone:</strong> ${phone}</li>
-        <li><strong>Message:</strong> ${message}</li>
-      </ul>
-    `,
-  };
-
-  try {
-    await bookingTransporter.sendMail(customerMail);
-    await bookingTransporter.sendMail(adminMail); // 🔔 Notify admin
-    console.log("✅ Booking emails sent (customer & admin)");
-    res.status(200).json({ message: "Booking emails sent" });
-  } catch (err) {
-    console.error("❌ Booking email error:", err.message);
-    res.status(500).json({ error: "Failed to send booking emails" });
-  }
+// Notify admin
+await bookingTransporter.sendMail({
+  from: `"Appointment Notification" <${process.env.BOOKING_MAIL_USER}>`,
+  to: process.env.APPOINTMENTS_EMAIL,
+  subject: `📅 New Manufacturing Appointment from ${name}`,
+  html: `
+    <h2>New manufacturing appointment request</h2>
+    <ul>
+      <li><strong>Name:</strong> ${name}</li>
+      <li><strong>Email:</strong> ${email}</li>
+      <li><strong>Phone:</strong> ${phone}</li>
+      <li><strong>Message:</strong> ${message}</li>
+    </ul>
+  `,
 });
 
 // ✅ PORT for Render
