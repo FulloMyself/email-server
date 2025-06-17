@@ -83,10 +83,11 @@ app.post("/send-email", async (req, res) => {
     console.log("✅ Order emails sent (customer & admin)");
     res.status(200).json({ message: "Order emails sent" });
   } catch (err) {
-    console.error("❌ Order email error:", err.message);
-    res.status(500).json({ error: "Failed to send order emails" });
-  }
+  console.error("❌ Order email error:", err);
+  res.status(500).json({ error: "Failed to send order emails", details: err.message });
+}
 });
+
 
 // ✅ Send Appointment Confirmation + Admin Notification
 app.post("/send-manufacturing-booking", async (req, res) => {
@@ -127,10 +128,10 @@ app.post("/send-manufacturing-booking", async (req, res) => {
     await adminTransporter.sendMail(adminMail); // 🔔 Notify admin
     console.log("✅ Booking emails sent (customer & admin)");
     res.status(200).json({ message: "Booking emails sent" });
-  } catch (err) {
-    console.error("❌ Booking email error:", err.message);
-    res.status(500).json({ error: "Failed to send booking emails" });
-  }
+  }catch (err) {
+  console.error("❌ Booking email error:", err); // full error object
+  res.status(500).json({ error: "Failed to send booking emails", details: err.message });
+}
 });
 
 // ✅ PORT for Render
