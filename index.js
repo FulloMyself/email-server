@@ -6,7 +6,7 @@ const app = express();
 
 // ✅ CORS setup
 app.use(cors({
-  origin: "http://localhost:5173", // Or replace with your actual frontend URL
+  origin: ["http://localhost:5173", "https://fullomyself.github.io"] ,// Or replace with your actual frontend URL
   methods: ["POST"],
 }));
 
