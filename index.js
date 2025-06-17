@@ -34,6 +34,17 @@ const bookingTransporter = nodemailer.createTransport({
   },
 });
 
+// --- Admin Transporter ---
+const adminTransporter = nodemailer.createTransport({
+  host: "mail.uniquescrubz.co.za",
+  port: 465,
+  secure: true,
+  auth: {
+    user: process.env.ADMIN_MAIL,
+    pass: process.env.ADMIN_PASSWORD,
+  },
+});
+
 // ✅ Send Order Confirmation + Admin Notification
 app.post("/send-email", async (req, res) => {
   const { name, email, items, total } = req.body;
@@ -68,7 +79,7 @@ app.post("/send-email", async (req, res) => {
 
   try {
     await orderTransporter.sendMail(customerMail);
-    await orderTransporter.sendMail(adminMail); // 🔔 Notify admin
+    await adminTransporter.sendMail(adminMail); // 🔔 Notify admin
     console.log("✅ Order emails sent (customer & admin)");
     res.status(200).json({ message: "Order emails sent" });
   } catch (err) {
@@ -113,7 +124,7 @@ app.post("/send-manufacturing-booking", async (req, res) => {
 
   try {
     await bookingTransporter.sendMail(customerMail);
-    await bookingTransporter.sendMail(adminMail); // 🔔 Notify admin
+    await adminTransporter.sendMail(adminMail); // 🔔 Notify admin
     console.log("✅ Booking emails sent (customer & admin)");
     res.status(200).json({ message: "Booking emails sent" });
   } catch (err) {
