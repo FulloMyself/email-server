@@ -36,7 +36,7 @@ const bookingTransporter = nodemailer.createTransport({
 
 // --- Admin Transporter ---
 const adminTransporter = nodemailer.createTransport({
-  host: "mail.uniquescrubz.co.za",
+  host: "mail.uniqueclothing.co.za",
   port: 465,
   secure: true,
   auth: {
@@ -63,7 +63,7 @@ app.post("/send-email", async (req, res) => {
   };
 
   const adminMail = {
-    from: `"Order Notification" <${process.env.ADMIN_EMAIL}>`,
+    from: `"Order Notification" <${process.env.ADMIN_MAIL}>`,
     to: process.env.ADMIN_EMAIL,
     subject: `🛒 New Order Received from ${name}`,
     html: `
@@ -108,7 +108,7 @@ app.post("/send-manufacturing-booking", async (req, res) => {
   };
 
   const adminMail = {
-    from: `"Appointment Notification" <${process.env.ADMIN_EMAIL}>`,
+    from: `"Appointment Notification" <${process.env.ADMIN_MAIL}>`,
     to: process.env.ADMIN_EMAIL,
     subject: `📅 New Appointment Request from ${name}`,
     html: `
