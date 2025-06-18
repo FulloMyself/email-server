@@ -74,6 +74,7 @@ app.post("/send-email", async (req, res) => {
         <li><strong>Order:</strong> ${items}</li>
         <li><strong>Total:</strong> ${total}</li>
       </ul>
+      <small>&copy; ${new Date().getFullYear()} Unique Scrubz</small>
     `,
   };
 
@@ -105,6 +106,7 @@ app.post("/send-manufacturing-booking", async (req, res) => {
         <li><strong>Phone:</strong> ${phone}</li>
         <li><strong>Message:</strong> ${message}</li>
       </ul>
+      <small>&copy; ${new Date().getFullYear()} Unique Scrubz</small>
     `,
   };
 
@@ -120,6 +122,7 @@ app.post("/send-manufacturing-booking", async (req, res) => {
         <li><strong>Phone:</strong> ${phone}</li>
         <li><strong>Message:</strong> ${message}</li>
       </ul>
+      <small>&copy; ${new Date().getFullYear()} Unique Scrubz</small>
     `,
   };
 
