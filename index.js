@@ -64,7 +64,7 @@ app.post("/send-email", async (req, res) => {
 
   const adminMail = {
     from: `"Order Notification" <${process.env.ADMIN_MAIL}>`,
-    to: process.env.ADMIN_EMAIL,
+    to: process.env.ADMIN_MAIL,
     subject: `🛒 New Order Received from ${name}`,
     html: `
       <h2>New order received</h2>
@@ -110,7 +110,7 @@ app.post("/send-manufacturing-booking", async (req, res) => {
 
   const adminMail = {
     from: `"Appointment Notification" <${process.env.ADMIN_MAIL}>`,
-    to: process.env.ADMIN_EMAIL,
+    to: process.env.ADMIN_MAIL,
     subject: `📅 New Appointment Request from ${name}`,
     html: `
       <h2>New manufacturing appointment request</h2>
