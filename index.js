@@ -6,7 +6,12 @@ const app = express();
 
 // ✅ CORS setup
 app.use(cors({
-  origin: ["http://localhost:5173", "https://fullomyself.github.io", "https://www.uniquescrubz.co.za", "https://uniquescrubz.co.za"],
+  origin: [
+    "http://localhost:5173",
+    "https://fullomyself.github.io",
+    "https://www.uniquescrubz.co.za",
+    "https://uniquescrubz.co.za"
+  ],
   methods: ["POST"],
 }));
 
@@ -45,6 +50,17 @@ const adminTransporter = nodemailer.createTransport({
   },
 });
 
+// ✅ --- Events Transporter (NEW) ---
+const eventsTransporter = nodemailer.createTransport({
+  host: "mail.uniqueclothing.co.za",
+  port: 465,
+  secure: true,
+  auth: {
+    user: process.env.EVENTS_MAIL_USER,
+    pass: process.env.EVENTS_MAIL_PASSWORD,
+  },
+});
+
 // ✅ Send Order Confirmation + Admin Notification
 app.post("/send-email", async (req, res) => {
   const { name, email, items, total } = req.body;
@@ -80,15 +96,14 @@ app.post("/send-email", async (req, res) => {
 
   try {
     await orderTransporter.sendMail(customerMail);
-    await adminTransporter.sendMail(adminMail); // 🔔 Notify admin
+    await adminTransporter.sendMail(adminMail);
     console.log("✅ Order emails sent (customer & admin)");
     res.status(200).json({ message: "Order emails sent" });
   } catch (err) {
-  console.error("❌ Order email error:", err);
-  res.status(500).json({ error: "Failed to send order emails", details: err.message });
-}
+    console.error("❌ Order email error:", err);
+    res.status(500).json({ error: "Failed to send order emails", details: err.message });
+  }
 });
-
 
 // ✅ Send Appointment Confirmation + Admin Notification
 app.post("/send-manufacturing-booking", async (req, res) => {
@@ -128,13 +143,57 @@ app.post("/send-manufacturing-booking", async (req, res) => {
 
   try {
     await bookingTransporter.sendMail(customerMail);
-    await adminTransporter.sendMail(adminMail); // 🔔 Notify admin
+    await adminTransporter.sendMail(adminMail);
     console.log("✅ Booking emails sent (customer & admin)");
     res.status(200).json({ message: "Booking emails sent" });
-  }catch (err) {
-  console.error("❌ Booking email error:", err); // full error object
-  res.status(500).json({ error: "Failed to send booking emails", details: err.message });
-}
+  } catch (err) {
+    console.error("❌ Booking email error:", err);
+    res.status(500).json({ error: "Failed to send booking emails", details: err.message });
+  }
+});
+
+// ✅ --- Send Event Confirmation + Admin Notification (NEW) ---
+app.post("/send-event-booking", async (req, res) => {
+  const { name, email, event, message } = req.body;
+
+  const customerMail = {
+    from: `"Unique Scrubz Events" <${process.env.EVENTS_MAIL_USER}>`,
+    to: email,
+    subject: `Your Booking for ${event} - Confirmation`,
+    html: `
+      <h2>Hi ${name},</h2>
+      <p>Thank you for booking for <strong>${event}</strong>.</p>
+      <p>We have received your request and will contact you shortly.</p>
+      <p><strong>Message:</strong> ${message}</p>
+      <small>&copy; ${new Date().getFullYear()} Unique Scrubz</small>
+    `,
+  };
+
+  const adminMail = {
+    from: `"Event Notification" <${process.env.ADMIN_MAIL}>`,
+    to: process.env.ADMIN_MAIL,
+    subject: `🎉 New Event Booking for ${event} from ${name}`,
+    html: `
+      <h2>New event booking</h2>
+      <ul>
+        <li><strong>Name:</strong> ${name}</li>
+        <li><strong>Email:</strong> ${email}</li>
+        <li><strong>Event:</strong> ${event}</li>
+        <li><strong>Message:</strong> ${message}</li>
+      </ul>
+      <small>&copy; ${new Date().getFullYear()} Unique Scrubz</small>
+    `,
+  };
+
+  try {
+    await eventsTransporter.sendMail(customerMail);
+    await adminTransporter.sendMail(adminMail);
+    console.log("✅ Event emails sent (customer & admin)");
+    res.status(200).json({ message: "Event emails sent" });
+  } catch (err) {
+    console.error("❌ Event email error:", err);
+    res.status(500).json({ error: "Failed to send event emails", details: err.message });
+  }
 });
 
 // ✅ PORT for Render
